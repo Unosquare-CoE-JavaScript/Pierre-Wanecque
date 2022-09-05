@@ -1,4 +1,4 @@
-import {async, ComponentFixture, fakeAsync, flush, flushMicrotasks, TestBed} from '@angular/core/testing';
+import {waitForAsync, ComponentFixture, fakeAsync, flush, flushMicrotasks, TestBed} from '@angular/core/testing';
 import {CoursesModule} from '../courses.module';
 import {DebugElement} from '@angular/core';
 
@@ -24,7 +24,7 @@ describe('HomeComponent', () => {
   const advancedCourses = setupCourses().filter(course => course.category == 'ADVANCED');
   const allCourses = setupCourses();
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
 
       let coursesServiceSpy = jasmine.createSpyObj('CoursesService', ["findAllCourses"]);
 
@@ -75,24 +75,41 @@ describe('HomeComponent', () => {
   });
 
 
-  it("should display advanced courses when tab clicked", (done: DoneFn) => {
+  it("should display advanced courses when tab clicked - FakeAsync", fakeAsync(() => {
     coursesService.findAllCourses.and.returnValue(of(allCourses));
     fixture.detectChanges();
     const tabs = el.queryAll(By.css(".mat-tab-label"));
     click(tabs[1]); // test helper on common folder
     fixture.detectChanges();
-    setTimeout(() => {
-      const cardTitles = el.queryAll(By.css('.mat-tab-body-active .mat-card-title')); // Get all card of tabs active
-      expect(cardTitles.length).toBeGreaterThan(0,"Could not find card titles"); // Check if we have card one tab active
-      expect(cardTitles[0].nativeElement.textContent).toContain("Angular Security Course"); // check title of component
+    flush();
 
-      // test if the name of the tab is "advanced"
-      console.log(tabs[1].nativeElement.textContent);
-      //expect(tabs[1].nativeElement.textContent).toContain("ffevs");
-      expect(tabs[1].nativeElement.textContent).toContain("Advanced test name");
+    const cardTitles = el.queryAll(By.css('.mat-tab-body-active .mat-card-title')); // Get all card of tabs active
+    expect(cardTitles.length).toBeGreaterThan(0,"Could not find card titles"); // Check if we have card one tab active
+    expect(cardTitles[0].nativeElement.textContent).toContain("Angular Security Course"); // check title of component
 
-      done();
-    }, 1000 );
-  });
+    // test if the name of the tab is "advanced"
+    console.log(tabs[1].nativeElement.textContent);
+    expect(tabs[1].nativeElement.textContent).toContain("Advanced test name");
 
+  }));
+
+  it("should display advanced courses when tab clicked - Async", waitForAsync(() => {
+      // accept HTTP request
+      coursesService.findAllCourses.and.returnValue(of(allCourses));
+      fixture.detectChanges();
+      const tabs = el.queryAll(By.css(".mat-tab-label"));
+      click(tabs[1]); // test helper on common folder
+      fixture.detectChanges();
+
+      fixture.whenStable().then(() => {
+        const cardTitles = el.queryAll(By.css('.mat-tab-body-active .mat-card-title')); // Get all card of tabs active
+        expect(cardTitles.length).toBeGreaterThan(0,"Could not find card titles"); // Check if we have card one tab active
+        expect(cardTitles[0].nativeElement.textContent).toContain("Angular Security Course"); // check title of component
+
+        // test if the name of the tab is "advanced"
+        console.log(tabs[1].nativeElement.textContent);
+        expect(tabs[1].nativeElement.textContent).toContain("Advanced test name");
+
+      });
+    }));
 });
