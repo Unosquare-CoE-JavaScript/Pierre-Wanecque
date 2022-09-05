@@ -47,9 +47,7 @@ describe('HomeComponent', () => {
   }));
 
   it("should create the component", () => {
-
     expect(component).toBeTruthy();
-
   });
 
 
@@ -77,7 +75,7 @@ describe('HomeComponent', () => {
   });
 
 
-  it("should display advanced courses when tab clicked", (donde: DoneFn) => {
+  it("should display advanced courses when tab clicked", (done: DoneFn) => {
     coursesService.findAllCourses.and.returnValue(of(allCourses));
     fixture.detectChanges();
     const tabs = el.queryAll(By.css(".mat-tab-label"));
@@ -92,6 +90,8 @@ describe('HomeComponent', () => {
       console.log(tabs[1].nativeElement.textContent);
       //expect(tabs[1].nativeElement.textContent).toContain("ffevs");
       expect(tabs[1].nativeElement.textContent).toContain("Advanced test name");
+
+      done();
     }, 1000 );
   });
 
